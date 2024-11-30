@@ -44,11 +44,43 @@ set(SRC_FILES
     src/lcms2_internal.h
 )
 
+include(CMakePackageConfigHelpers)
+set(CONFIG_INSTALL_DIR lib/cmake/lcms2)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/lcms2Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/lcms2Config.cmake
+    INSTALL_DESTINATION ${CONFIG_INSTALL_DIR}
+)
+
+install(EXPORT lcms2Targets
+    FILE lcms2Targets.cmake
+    NAMESPACE lcms2::
+    DESTINATION ${CONFIG_INSTALL_DIR}
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/lcms2Config.cmake
+    DESTINATION ${CONFIG_INSTALL_DIR}
+)
+
 add_library(lcms2 SHARED ${SRC_FILES})
-target_include_directories(lcms2 PUBLIC include)
+
+if (WIN32)
+    target_compile_definitions(lcms2 PRIVATE CMS_DLL)
+    target_compile_definitions(lcms2 PRIVATE CMS_DLL_BUILD)
+endif()
+
+target_include_directories(lcms2
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+)
 set_target_properties(lcms2 PROPERTIES VERSION ${LIBRARY_VERSION} SOVERSION ${LCMS2_VERSION_MAJOR})
 
-install(TARGETS lcms2 LIBRARY DESTINATION lib)
+install(TARGETS lcms2
+        EXPORT lcms2Targets
+        LIBRARY DESTINATION lib
+        INCLUDES DESTINATION include)
 
 install(FILES include/lcms2.h include/lcms2_plugin.h
     DESTINATION include
