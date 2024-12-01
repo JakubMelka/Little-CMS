@@ -48,11 +48,12 @@ include(CMakePackageConfigHelpers)
 
 SET(PACKAGE "lcms2")
 
+add_library(lcms2 SHARED ${SRC_FILES} src/lcms2.def)
+
 target_compile_definitions(lcms2 PUBLIC CMS_DLL)
 target_compile_definitions(lcms2 PRIVATE CMS_DLL_BUILD)
 target_compile_definitions(lcms2 PRIVATE UNICODE _UNICODE)
 target_compile_definitions(lcms2 PUBLIC CMS_NO_REGISTER_KEYWORD)
-
 
 target_include_directories(lcms2
     PUBLIC
@@ -63,7 +64,6 @@ set_target_properties(lcms2 PROPERTIES
                       PUBLIC_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/lcms2.h;${CMAKE_CURRENT_LIST_DIR}/include/lcms2_plugin.h"
                       VERSION ${LIBRARY_VERSION} SOVERSION ${LCMS2_VERSION_MAJOR})
 
-add_library(lcms2 SHARED ${SRC_FILES} src/lcms2.def)
 
 SET(prefix "${CMAKE_INSTALL_PREFIX}")
 SET(exec_prefix "\${prefix}")
