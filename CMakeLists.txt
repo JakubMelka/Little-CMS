@@ -81,7 +81,7 @@ install(TARGETS lcms2
 INSTALL(FILES ${PROJECT_BINARY_DIR}/lcms2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 install(EXPORT lcms2Config
-        DESTINATION "share/lcms2"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lcms2
         NAMESPACE lcms2::
 )
 
