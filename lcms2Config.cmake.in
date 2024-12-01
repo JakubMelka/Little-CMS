@@ -1,3 +1,6 @@
 @PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/lcms2Targets.cmake")
+
+set(lcms2_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
+set(lcms2_LIBRARIES lcms2::lcms2)
