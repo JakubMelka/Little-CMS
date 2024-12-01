@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(lcms2 LANGUAGES C VERSION 2.16)
+cmake_minimum_required(VERSION 3.5)
+project(lcms2 VERSION 2.16)
 
 set(LCMS2_VERSION_MAJOR 2)
 set(LCMS2_VERSION_MINOR 16)
@@ -45,43 +45,43 @@ set(SRC_FILES
 )
 
 include(CMakePackageConfigHelpers)
-set(CONFIG_INSTALL_DIR lib/cmake/lcms2)
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/lcms2Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/lcms2Config.cmake
-    INSTALL_DESTINATION ${CONFIG_INSTALL_DIR}
-)
 
-install(EXPORT lcms2Targets
-    FILE lcms2Targets.cmake
-    NAMESPACE lcms2::
-    DESTINATION ${CONFIG_INSTALL_DIR}
-)
+SET(PACKAGE "lcms2")
 
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/lcms2Config.cmake
-    DESTINATION ${CONFIG_INSTALL_DIR}
-)
+target_compile_definitions(lcms2 PUBLIC CMS_DLL)
+target_compile_definitions(lcms2 PRIVATE CMS_DLL_BUILD)
+target_compile_definitions(lcms2 PRIVATE UNICODE _UNICODE)
+target_compile_definitions(lcms2 PUBLIC CMS_NO_REGISTER_KEYWORD)
 
-add_library(lcms2 SHARED ${SRC_FILES})
-
-if (WIN32)
-    target_compile_definitions(lcms2 PRIVATE CMS_DLL)
-    target_compile_definitions(lcms2 PRIVATE CMS_DLL_BUILD)
-endif()
 
 target_include_directories(lcms2
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
-set_target_properties(lcms2 PROPERTIES VERSION ${LIBRARY_VERSION} SOVERSION ${LCMS2_VERSION_MAJOR})
+        $<INSTALL_INTERFACE:include>)
+
+set_target_properties(lcms2 PROPERTIES
+                      PUBLIC_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/lcms2.h;${CMAKE_CURRENT_LIST_DIR}/include/lcms2_plugin.h"
+                      VERSION ${LIBRARY_VERSION} SOVERSION ${LCMS2_VERSION_MAJOR})
+
+add_library(lcms2 SHARED ${SRC_FILES} src/lcms2.def)
+
+SET(prefix "${CMAKE_INSTALL_PREFIX}")
+SET(exec_prefix "\${prefix}")
+SET(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+SET(includedir "\${prefix}/include")
+CONFIGURE_FILE(lcms2.pc.in "${PROJECT_BINARY_DIR}/lcms2.pc" @ONLY)
 
 install(TARGETS lcms2
-        EXPORT lcms2Targets
-        LIBRARY DESTINATION lib
-        INCLUDES DESTINATION include)
+        EXPORT lcms2Config
+        RUNTIME DESTINATION "bin"
+        LIBRARY DESTINATION "lib"
+        ARCHIVE DESTINATION "lib"
+        PUBLIC_HEADER DESTINATION "include")
 
-install(FILES include/lcms2.h include/lcms2_plugin.h
-    DESTINATION include
+INSTALL(FILES ${PROJECT_BINARY_DIR}/lcms2.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+install(EXPORT lcms2Config
+        DESTINATION "share/lcms2"
+        NAMESPACE lcms2::
 )
+
