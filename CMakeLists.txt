@@ -12,6 +12,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
+# Zajištění správných instalačních cest (pomocí GNUInstallDirs)
+include(GNUInstallDirs)
+
 # Seznam zdrojových souborů
 set(SRC_FILES
     include/lcms2.h
@@ -61,16 +64,9 @@ target_include_directories(lcms2
 
 # Nastavení vlastností targetu
 set_target_properties(lcms2 PROPERTIES
-    PUBLIC_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/lcms2.h;${CMAKE_CURRENT_LIST_DIR}/include/lcms2_plugin.h"
+    PUBLIC_HEADER "include/lcms2.h;include/lcms2_plugin.h"
     VERSION ${LIBRARY_VERSION}
     SOVERSION ${LCMS2_VERSION_MAJOR})
-
-# Generování souboru pkg-config
-set(prefix "${CMAKE_INSTALL_PREFIX}")
-set(exec_prefix "\${prefix}")
-set(libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
-set(includedir "\${prefix}/include")
-configure_file(lcms2.pc.in "${PROJECT_BINARY_DIR}/lcms2.pc" @ONLY)
 
 # Instalace targetu
 install(TARGETS lcms2
@@ -78,10 +74,7 @@ install(TARGETS lcms2
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION include)
-
-# Instalace pkg-config souboru
-install(FILES "${PROJECT_BINARY_DIR}/lcms2.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Export targetů pro použití v CMake
 install(EXPORT lcms2-targets
@@ -91,6 +84,7 @@ install(EXPORT lcms2-targets
 
 # Vytvoření konfigurace CMake pro použití find_package
 include(CMakePackageConfigHelpers)
+
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/lcms2ConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
